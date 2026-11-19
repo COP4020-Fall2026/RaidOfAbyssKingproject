@@ -7,7 +7,7 @@
 class Boss : public Character {
 private:
     int rage;
-
+hjhjj
 public:
     // TO DO implement the required member functions
 };
