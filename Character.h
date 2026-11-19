@@ -1,12 +1,14 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
-
+#include <iostream>
 #include <string>
 #include <stdexcept>
 
+using namespaces std;
+
 class Character {
 protected:
-    std::string name;
+    string name;
     int health;
     int maxHealth;
     int energy;
@@ -14,7 +16,7 @@ protected:
     bool defending;
 
 public:
-    Character(const std::string& n, int hp, int atk, int en = 100);
+    Character(const string& n, int hp, int atk, int en = 100);
     virtual ~Character() = default;
 
     // ADD THE pure virtual FUNCTION basicAttack 
