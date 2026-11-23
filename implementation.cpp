@@ -315,6 +315,20 @@ void Game::handleLeftClick(sf::Vector2i mousePos) {
     // TODO 17:
     // Allow the player to click hero cards to select one alive hero.
     // You should update selectedPlayerIndex and add a message to the battle log.
+     for (std::size_t i = 0; i < players.size(); i++)
+          {
+               sf::FloatRect cardRect(
+               {30.f + i * 180.f, 120.f}, {160.f, 220.f});
+               if (pointInRect(point, cardRect))
+               {
+                    if (players[i]->isAlive())
+                    {
+                         selectedPlayerIndex = static_cast<int>(i);
+                         addLog(players[i]->getName() + " selected.");
+                    }
+                    return;
+               }
+          }
 
     for (const auto& button : actionButtons) {
         if (pointInRect(point, button.shape.getGlobalBounds())) {
@@ -393,7 +407,7 @@ int Game::findNextAlivePlayer(int startIndex) const {
     // Return the index of the next alive player.
     // Wrap around using modular arithmetic.
     const int n = static_cast<int>(players.size());
-    for (int i = 0; i < n; ++i) {
+    for (int i = 1; i < n; i++) {
         const int idx = (startIndex + i) % n;
         if (players[idx]->isAlive()) {
             return idx;
@@ -430,6 +444,11 @@ void Game::addLog(const std::string& line) {
 
     // TODO 27:
     // Limit the battle log to a fixed maximum number of visible messages.
+
+     while(battleLog.size() > 8)
+          {
+               battleLog.erase(battleLog.begin());
+          }
 }
 
 void Game::draw() {
@@ -460,6 +479,23 @@ void Game::drawTitle() {
     // Display either:
     // 1. the current player's turn, or
     // 2. Victory / Defeat when the game ends.
+
+     if (gameOver)
+     {
+          if (playerWon)
+          {
+               drawCenteredText("Victory!!", 34, {600.f, 95.f}, sf::Color::Green);
+          } 
+          else
+          {
+               drawCenteredText("Defeat!!", 34, {600.f, 95.f}, sf::Color::Red);
+          } 
+     }
+else
+{
+     drawCenteredText(players[currentPlayerIndex]->getName() + "'s Turn",
+          34, {600.f, 95.f}, sf::Color::White);
+     
 }
 
 
@@ -620,6 +656,12 @@ void Game::drawCenteredText(const std::string& textValue, unsigned int size, sf:
 
     // TODO 30:
     // Center this text using its local bounds.
+     sf::FloatRect bounds = text.getLocalBounds();
+
+     text.setOrigin(
+          bounds.position.x + bounds.size.x / 2.f,
+          bounds.position.y + bounds.size.y / 2.f);
+     
     text.setPosition(center);
     window.draw(text);
 }
@@ -627,5 +669,5 @@ void Game::drawCenteredText(const std::string& textValue, unsigned int size, sf:
 bool Game::pointInRect(sf::Vector2f point, const sf::FloatRect& rect) const {
     // TODO 31:
     // Return true if the point is inside the rectangle.
-    return false;
+    return rect.contains(point);
 }
