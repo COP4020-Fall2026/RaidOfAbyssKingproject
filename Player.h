@@ -29,7 +29,7 @@ Friend std::ostream& operator<<(std::ostream& os, const Player& player);
 These functions must be override, this allows each class to behave differently during combat.
  */
 
-class Warrior : Player //Inherit from Player class {
+class Warrior : class Player { //Inherit from Player class {
 public:
     explicit Warrior(const std::string& n);
     int basicAttack(Character& target) ; //complete prototype
@@ -37,7 +37,7 @@ public:
     std::string getClassName() const ; //complete prototype
 };
 
-class Mage : Player //Inherit from Player class {
+class Mage : class Player {//Inherit from Player class {
 public:
     explicit Mage(const std::string& n); //complete prototype
     int basicAttack(Character& target) ; //complete prototype
@@ -45,7 +45,7 @@ public:
     std::string getClassName() const ; //complete prototype
 };
 
-class Healer : Player//Inherit from Player class {
+class Healer : class Player{//Inherit from Player class {
 public:
     explicit Healer(const std::string& n); //complete prototype
     int basicAttack(Character& target) ; //complete prototype
