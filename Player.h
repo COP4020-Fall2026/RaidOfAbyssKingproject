@@ -15,11 +15,11 @@ public:
     int usePotion();
     int getPotions() const;
     void addPotion(int amount);
-
+Player& operator +=(int amount);
     /*prototype the Overload the operator += function; return a Player and received one parameter int*/
     bool operator==(const Player& other) const;
     /*Prototype the Overload the operator << functions, provide the nedded parameters, and the correct overloading syntax*/
-
+Friend std::ostream& operator<<(std::ostream& os, const Player& player);
 };
 
 /*Note:
@@ -29,7 +29,7 @@ public:
 These functions must be override, this allows each class to behave differently during combat.
  */
 
-class Warrior : //Inherit from Player class {
+class Warrior : Player //Inherit from Player class {
 public:
     explicit Warrior(const std::string& n);
     int basicAttack(Character& target) ; //complete prototype
@@ -37,7 +37,7 @@ public:
     std::string getClassName() const ; //complete prototype
 };
 
-class Mage : //Inherit from Player class {
+class Mage : Player //Inherit from Player class {
 public:
     explicit Mage(const std::string& n); //complete prototype
     int basicAttack(Character& target) ; //complete prototype
@@ -45,7 +45,7 @@ public:
     std::string getClassName() const ; //complete prototype
 };
 
-class Healer : //Inherit from Player class {
+class Healer : Player//Inherit from Player class {
 public:
     explicit Healer(const std::string& n); //complete prototype
     int basicAttack(Character& target) ; //complete prototype
