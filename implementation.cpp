@@ -220,7 +220,8 @@ std::string Boss::chooseAttackName() const {
 
 Button::Button(const sf::Font& font, const std::string& text, const std::string& actionName,
                sf::Vector2f position, sf::Vector2f size)
-    : shape(size), label(font), action(actionName) {
+    : shape(size), label(font), action(actionName)
+{
     shape.setPosition(position);
     shape.setFillColor(sf::Color(55, 70, 110));
     shape.setOutlineThickness(2.f);
@@ -233,6 +234,12 @@ Button::Button(const sf::Font& font, const std::string& text, const std::string&
     // TODO 16:
     // Center the label text inside the button.
     // Students should use getLocalBounds() and setPosition(...).
+     sf::FloatRect bounds = label.getLocalBounds();
+
+     label.setPosition(
+          position.x + (size.x - bounds.size.x) / 2.f,
+          position.y + (size.y - bounds.size.y) / 2.f - bounds.position.y
+     );
 }
 
 // =====================================================
@@ -315,6 +322,20 @@ void Game::handleLeftClick(sf::Vector2i mousePos) {
     // TODO 17:
     // Allow the player to click hero cards to select one alive hero.
     // You should update selectedPlayerIndex and add a message to the battle log.
+     for (std::size_t i = 0; i < players.size(); i++)
+          {
+               sf::FloatRect cardRect(
+               {30.f + i * 180.f, 120.f}, {160.f, 220.f});
+               if (pointInRect(point, cardRect))
+               {
+                    if (players[i]->isAlive())
+                    {
+                         selectedPlayerIndex = static_cast<int>(i);
+                         addLog(players[i]->getName() + " selected.");
+                    }
+                    return;
+               }
+          }
 
     for (const auto& button : actionButtons) {
         if (pointInRect(point, button.shape.getGlobalBounds())) {
@@ -338,6 +359,11 @@ void Game::performAction(const std::string& action) {
     // TODO 18:
     // Make sure only the current player's turn can be played.
     // If the selected player is not the one whose turn it is, log a message and stop.
+     if (selectedPlayerIndex != currentPlayerIndex)
+     {
+          addLog("It is not that hero's turn.");
+          return;
+     }
 
     Player& player = *players[currentPlayerIndex];
     if (!player.isAlive()) {
@@ -346,19 +372,46 @@ void Game::performAction(const std::string& action) {
     }
 
     try {
-        if (action == "attack") {
+        if (action == "attack") 
+        {
+             /****** NEED TO VERIFY ******/
             // TODO 19:
             // Call the selected player's basicAttack and log the damage.
-        } else if (action == "special") {
+             int damage = player.basicAttack(boss);
+
+             addLog(player.getName() + " attacks for " + std::to_string(damage) + " damage.");
+             
+        } 
+        else if (action == "special") 
+        {
+             /****** NEED TO VERIFY ******/
             // TODO 20:
             // Support both damage specials and healer special behavior.
-        } else if (action == "defend") {
+             int result = player.specialMove(boss);
+
+             if (player.getClassName() == "Healer")
+             {
+                  addLog(player.getName() + " healed for " + std::to_string(result) + " health.");
+             }
+             else
+             {
+                  addLog(player.getName() + " used a special attack for " + std::to_string(result) + " damage.");
+             }
+        }
+        else if (action == "defend") 
+        {
             player.setDefending(true);
             player.addEnergy(10);
             addLog(player.getName() + " braces for impact.");
-        } else if (action == "item") {
+        }
+        else if (action == "item") 
+           {
+          /****** NEED TO VERIFY ******/
             // TODO 21:
             // Use a potion and log the healing.
+                  int healed = player.usePotion();
+
+                  addLog(player.getName() + " restored " + std::to_string(healed) + " HP using a potion.");
         }
     } catch (const std::exception& ex) {
         addLog(std::string("Action failed: ") + ex.what());
@@ -368,41 +421,113 @@ void Game::performAction(const std::string& action) {
     // TODO 22:
     // Detect victory after the player's action.
     // If the boss is defeated, set the correct end-state and stop.
+     if (!boss.isAlive())
+     {
+          gameOver = true;
+          playerWon = true;
+
+          addLog("The Abyss King has been defeated!");
+
+          return;
+     }
 
     endTurnIfNeeded();
 }
 
-void Game::endTurnIfNeeded() {
+void Game::endTurnIfNeeded() 
+{
+     /****** NEED TO VERIFY ******/
     // TODO 23:
     // Move to the next alive player.
     // After the last hero acts, the boss should take a turn.
     // Then restore the turn to the next alive hero.
+     int previousPlayer = currentPlayerIndex;
+
+     currentPlayerIndex = findNextAlivePlayer(currentPlayerIndex);
+
+     if (currentPlayerIndex <= previousPlayer)
+     {
+          bossTurn();
+
+          if (!gameOver)
+          {
+               currentPlayerIndex = findNextAlivePlayer(currentPlayerIndex);
+          }
+     }
+     
     selectedPlayerIndex = currentPlayerIndex;
 }
 
-void Game::bossTurn() {
+void Game::bossTurn() 
+{
+     /****** NEED TO VERIFY ******/
     // TODO 24:
     // Choose a random alive target.
     // If the boss has enough rage, use the special move.
     // Otherwise, use the basic attack.
     // Log the action and damage.
+
+     std::vector<int> alivePlayers;
+
+     for (std::size_t i = 0; i < players.size(); i ++)
+          {
+               if (players[i]->isAlive())
+               {
+                    alivePlayers.push_back(static_cast<int>(i));
+               }
+          }
+     if (alivePlayers.empty())
+     {
+          return;
+     }
+
+     int randomIndex = std::rand() % alivePlayers.size();
+
+     Player& target = *players[alivePlayers[randomIndex]];
+
+     int damage = 0;
+
+     if (boss.getRage() >= 60)
+     {
+          damage = boss.specialMove(target);
+
+          addLog("Abyss King used Abyssal Smash on " + target.getName() + " for " + std::to_string(damage) + " damage.");
+     } else
+     {
+          
+          damage = boss.basicAttack(target);
+
+          addLog("Abyss King used Shadow Slash on " + target.getName() + " for " + std::to_string(damage) + " damage.");
+     }
+
+     if (allPlayersDefeated())
+     {
+          gameOver = true;
+          playerWon = false;
+
+          addLog("All heroes have been defeated. Better luck next time.");
+     }
 }
 
-int Game::findNextAlivePlayer(int startIndex) const {
+int Game::findNextAlivePlayer(int startIndex) const 
+{
     // TODO 25:
     // Return the index of the next alive player.
     // Wrap around using modular arithmetic.
     const int n = static_cast<int>(players.size());
-    for (int i = 0; i < n; ++i) {
+    for (int i = 1; i <= n; i++) 
+    {
         const int idx = (startIndex + i) % n;
-        if (players[idx]->isAlive()) {
+        if (players[idx]->isAlive()) 
+        {
             return idx;
         }
     }
     return 0;
 }
 
-bool Game::allPlayersDefeated() const {
+bool Game::allPlayersDefeated() const 
+{
     // TODO 26:
     // Return true only if every player has been defeated.
     for (const auto& player : players) {
@@ -411,7 +536,8 @@ bool Game::allPlayersDefeated() const {
     return true;
 }
 
-void Game::resetGame() {
+void Game::resetGame() 
+{
     players.clear();
     players.emplace_back(std::make_unique<Warrior>("Brakus"));
     players.emplace_back(std::make_unique<Mage>("Lyra"));
@@ -425,11 +551,17 @@ void Game::resetGame() {
     addLog("Raid restarted.");
 }
 
-void Game::addLog(const std::string& line) {
+void Game::addLog(const std::string& line) 
+{
     battleLog.push_back(line);
 
     // TODO 27:
     // Limit the battle log to a fixed maximum number of visible messages.
+
+     while(battleLog.size() > 7)
+          {
+               battleLog.erase(battleLog.begin());
+          }
 }
 
 void Game::draw() {
@@ -460,6 +592,22 @@ void Game::drawTitle() {
     // Display either:
     // 1. the current player's turn, or
     // 2. Victory / Defeat when the game ends.
+
+     if (gameOver)
+     {
+          if (playerWon)
+          {
+               drawCenteredText("Victory!!", 34, {600.f, 95.f}, sf::Color::Green);
+          } 
+          else
+          {
+               drawCenteredText("Defeat!!", 34, {600.f, 95.f}, sf::Color::Red);
+          } 
+     }
+     else
+     {
+          drawCenteredText(players[currentPlayerIndex]->getName() + "'s Turn", 34, {600.f, 95.f}, sf::Color::White);
+     }
 }
 
 
@@ -468,7 +616,8 @@ void Game::drawPlayers() {
         sf::Color(80, 150, 240), sf::Color(180, 100, 250), sf::Color(80, 200, 140)
     };
 
-    for (std::size_t i = 0; i < players.size(); ++i) {
+    for (std::size_t i = 0; i < players.size(); ++i) 
+    {
         const float x = 30.f + i * 180.f;
         const float y = 120.f;
 
@@ -478,9 +627,22 @@ void Game::drawPlayers() {
 
         // TODO 29:
         // Improve the card outline so the current player is visually highlighted.
-        card.setOutlineThickness(2.f);
-        card.setOutlineColor(players[i]->isAlive() ? sf::Color::White : sf::Color(120, 120, 120));
-        window.draw(card);
+        if (static_cast<int>(i) == currentPlayerIndex)
+        {
+             card.setOutlineThickness(4.f);
+             card.setOutlineColor(sf::Color::Yellow);
+        }
+         else
+        {
+             card.setOutlineThickness(2.f);
+             card.setOutlineColor(
+                  players[i]->isAlive()
+                  ? sf::Color::White 
+                  : sf::Color(120, 120, 120)
+             );
+        }
+        
+         window.draw(card);
 
         sf::CircleShape avatar(34.f);
         avatar.setPosition({x + 46.f, y + 18.f});
@@ -620,12 +782,17 @@ void Game::drawCenteredText(const std::string& textValue, unsigned int size, sf:
 
     // TODO 30:
     // Center this text using its local bounds.
+     sf::FloatRect bounds = text.getLocalBounds();
+
+     text.setOrigin(bounds.position.x + bounds.size.x / 2.f, bounds.position.y + bounds.size.y / 2.f);
+     
     text.setPosition(center);
     window.draw(text);
 }
 
-bool Game::pointInRect(sf::Vector2f point, const sf::FloatRect& rect) const {
+bool Game::pointInRect(sf::Vector2f point, const sf::FloatRect& rect) const
+{
     // TODO 31:
     // Return true if the point is inside the rectangle.
-    return false;
+    return rect.contains(point);
 }
