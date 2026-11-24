@@ -2,9 +2,10 @@
 #define PLAYER_H
 
 #include "Character.h"
+#include <string>
 #include <ostream>
 
-class Player : //Inherit from Charecter class {
+class Player : public Character { //Inherit from Charecter class 
 protected:
     int potions;
 
@@ -29,28 +30,28 @@ Friend std::ostream& operator<<(std::ostream& os, const Player& player);
 These functions must be override, this allows each class to behave differently during combat.
  */
 
-class Warrior : class Player { //Inherit from Player class {
+class Warrior : public Player { //Inherit from Player class {
 public:
     explicit Warrior(const std::string& n);
-    int basicAttack(Character& target) ; //complete prototype
-    int specialMove(Character& target) ; //complete prototype
-    std::string getClassName() const ; //complete prototype
+    int basicAttack(Character& target) override; //complete prototype
+    int specialMove(Character& target) override; //complete prototype
+    std::string getClassName() const override; //complete prototype
 };
 
-class Mage : class Player {//Inherit from Player class {
+class Mage : public Player {//Inherit from Player class {
 public:
     explicit Mage(const std::string& n); //complete prototype
-    int basicAttack(Character& target) ; //complete prototype
-    int specialMove(Character& target) ; //complete prototype
-    std::string getClassName() const ; //complete prototype
+    int basicAttack(Character& target) override; //complete prototype
+    int specialMove(Character& target) override; //complete prototype
+    std::string getClassName() const override; //complete prototype
 };
 
-class Healer : class Player{//Inherit from Player class {
+class Healer : public Player{//Inherit from Player class {
 public:
     explicit Healer(const std::string& n); //complete prototype
-    int basicAttack(Character& target) ; //complete prototype
-    int specialMove(Character& target) ; //complete prototype
-    std::string getClassName() const ; //complete prototype
+    int basicAttack(Character& target) override; //complete prototype
+    int specialMove(Character& target) override; //complete prototype
+    std::string getClassName() const override; //complete prototype
 };
 
 #endif
