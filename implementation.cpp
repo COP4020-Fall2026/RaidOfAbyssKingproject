@@ -5,6 +5,7 @@
 #include <optional>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 // =====================================================
 // Character
@@ -372,19 +373,46 @@ void Game::performAction(const std::string& action) {
     }
 
     try {
-        if (action == "attack") {
+        if (action == "attack") 
+        {
+             /****** NEED TO VERIFY ******/
             // TODO 19:
             // Call the selected player's basicAttack and log the damage.
-        } else if (action == "special") {
+             int damage = player.basicAttack(boss);
+
+             addLog(player.getName() + " attacks for " + std::to_string(damage) + " damage.");
+             
+        } 
+        else if (action == "special") 
+        {
+             /****** NEED TO VERIFY ******/
             // TODO 20:
             // Support both damage specials and healer special behavior.
-        } else if (action == "defend") {
+             int result = player.specialMove(boss);
+
+             if (player.getClassName() == "Healer")
+             {
+                  addLog(player.getName() + " healed for " + std::to_string(result) + " health.");
+             }
+             else
+             {
+                  addLog(player.getName() + " used a special attack for " + std::to_string(result) + " damage.");
+             }
+        }
+        else if (action == "defend") 
+        {
             player.setDefending(true);
             player.addEnergy(10);
             addLog(player.getName() + " braces for impact.");
-        } else if (action == "item") {
+        }
+        else if (action == "item") 
+           {
+          /****** NEED TO VERIFY ******/
             // TODO 21:
             // Use a potion and log the healing.
+                  int healed = player.usePotion();
+
+                  addLog(player.getName() + " restored " + std::to_string(healed) + " HP using a potion.");
         }
     } catch (const std::exception& ex) {
         addLog(std::string("Action failed: ") + ex.what());
@@ -407,20 +435,79 @@ void Game::performAction(const std::string& action) {
     endTurnIfNeeded();
 }
 
-void Game::endTurnIfNeeded() {
+void Game::endTurnIfNeeded() 
+{
+     /****** NEED TO VERIFY ******/
     // TODO 23:
     // Move to the next alive player.
     // After the last hero acts, the boss should take a turn.
     // Then restore the turn to the next alive hero.
+     int previousPlayer = currentPlayerIndex;
+
+     currentPlayerIndex = findNextAlivePlayer(currentPlayerIndex);
+
+     if (currentPlayerIndex <= previousPlayer)
+     {
+          bossTurn();
+
+          if (!gameOver)
+          {
+               currentPlayerIndex = findNextAlivePlayer(currentPlayerIndex);
+          }
+     }
+     
     selectedPlayerIndex = currentPlayerIndex;
 }
 
-void Game::bossTurn() {
+void Game::bossTurn() 
+{
+     /****** NEED TO VERIFY ******/
     // TODO 24:
     // Choose a random alive target.
     // If the boss has enough rage, use the special move.
     // Otherwise, use the basic attack.
     // Log the action and damage.
+
+     std::vector<int> alivePlayers;
+
+     for (std::size_t i = 0; i < players.size(); i ++)
+          {
+               if (players[i]->isAlive())
+               {
+                    alivePlayers.push_back(static_cast<int>(i));
+               }
+          }
+     if (alivePlayers.empty())
+     {
+          return;
+     }
+
+     int randomIndex = std::rand() % alivePlayers.size();
+
+     Player& target = *players[alivePlayers[randomIndex]];
+
+     int damage = 0;
+
+     if (boss.getRage() >= 60)
+     {
+          damage = boss.specialMove(target);
+
+          addLog("Abyss King used Abyssal Smash on " + target.getName() + " for " + std::to_string(damage) + " damage.");
+     } else
+     {
+          
+          damage = boss.basicAttack(target);
+
+          addLog("Abyss King used Shadow Slash on " + target.getName() + " for " + std::to_string(damage) + " damage.");
+     }
+
+     if (allPlayersDefeated())
+     {
+          gameOver = true;
+          playerWon = false;
+
+          addLog("All heroes have been defeated. Better luck next time.");
+     }
 }
 
 int Game::findNextAlivePlayer(int startIndex) const 
@@ -520,9 +607,7 @@ void Game::drawTitle() {
      }
      else
      {
-          drawCenteredText(players[currentPlayerIndex]->getName() + "'s Turn",
-               34, {600.f, 95.f}, sf::Color::White);
-          
+          drawCenteredText(players[currentPlayerIndex]->getName() + "'s Turn", 34, {600.f, 95.f}, sf::Color::White);
      }
 }
 
@@ -532,7 +617,8 @@ void Game::drawPlayers() {
         sf::Color(80, 150, 240), sf::Color(180, 100, 250), sf::Color(80, 200, 140)
     };
 
-    for (std::size_t i = 0; i < players.size(); ++i) {
+    for (std::size_t i = 0; i < players.size(); ++i) 
+    {
         const float x = 30.f + i * 180.f;
         const float y = 120.f;
 
@@ -699,15 +785,14 @@ void Game::drawCenteredText(const std::string& textValue, unsigned int size, sf:
     // Center this text using its local bounds.
      sf::FloatRect bounds = text.getLocalBounds();
 
-     text.setOrigin(
-          bounds.position.x + bounds.size.x / 2.f,
-          bounds.position.y + bounds.size.y / 2.f);
+     text.setOrigin(bounds.position.x + bounds.size.x / 2.f, bounds.position.y + bounds.size.y / 2.f);
      
     text.setPosition(center);
     window.draw(text);
 }
 
-bool Game::pointInRect(sf::Vector2f point, const sf::FloatRect& rect) const {
+bool Game::pointInRect(sf::Vector2f point, const sf::FloatRect& rect) const
+{
     // TODO 31:
     // Return true if the point is inside the rectangle.
     return rect.contains(point);
