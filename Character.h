@@ -1,12 +1,15 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
+#include <iostream>
 #include <string>
 #include <stdexcept>
 
+using namespaces std;
+
 class Character {
 protected:
-    std::string name;
+    string name;
     int health;
     int maxHealth;
     int energy;
@@ -14,22 +17,28 @@ protected:
     bool defending;
 
 public:
-    Character(const std::string& n, int hp, int atk, int en = 100);
+    Character(const string& n, int hp, int atk, int en = 100);
     virtual ~Character() = default;
 
     // ADD THE pure virtual FUNCTION basicAttack 
+   /* virtual int basicAttack(Character& target) = 0; */
     virtual int specialMove(Character& target) = 0;
-    virtual std::string getClassName() const = 0;
-
+    virtual string getClassName() const = 0;
+    /* virtual void heal(int amount) */
     virtual void takeDamage(int amount);
     // ADD THE virtual void heal(int amount);
-
+    virtual void heal(int amount
     bool isAlive() const;
     // Add setDefending function;
+void setDefending(bool value);
     // add isDefending() function;
-
-    const std::string& getName() const;
-    // ADD THE GETTERS
+bool isDefending() const;
+//Add GETTERS 
+    const string& getName() const;
+    int getHealth() const;
+    int getMaxHealth() const;
+    int getEnergy() const;
+    int getAttackPower() const;
     void addEnergy(int amount);
     void consumeEnergy(int amount);
 };
