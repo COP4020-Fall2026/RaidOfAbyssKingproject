@@ -220,7 +220,8 @@ std::string Boss::chooseAttackName() const {
 
 Button::Button(const sf::Font& font, const std::string& text, const std::string& actionName,
                sf::Vector2f position, sf::Vector2f size)
-    : shape(size), label(font), action(actionName) {
+    : shape(size), label(font), action(actionName)
+{
     shape.setPosition(position);
     shape.setFillColor(sf::Color(55, 70, 110));
     shape.setOutlineThickness(2.f);
@@ -233,6 +234,12 @@ Button::Button(const sf::Font& font, const std::string& text, const std::string&
     // TODO 16:
     // Center the label text inside the button.
     // Students should use getLocalBounds() and setPosition(...).
+     sf::FloatRect bounds = label.getLocalBounds();
+
+     label.setPosition(
+          position.x + (size.x - bounds.size.x) / 2.f,
+          position.y + (size.y - bounds.size.y) / 2.f - bounds.position.y
+     );
 }
 
 // =====================================================
@@ -352,6 +359,11 @@ void Game::performAction(const std::string& action) {
     // TODO 18:
     // Make sure only the current player's turn can be played.
     // If the selected player is not the one whose turn it is, log a message and stop.
+     if (selectedPlayerIndex != currentPlayerIndex)
+     {
+          addLog("It is not that hero's turn.");
+          return;
+     }
 
     Player& player = *players[currentPlayerIndex];
     if (!player.isAlive()) {
@@ -382,6 +394,15 @@ void Game::performAction(const std::string& action) {
     // TODO 22:
     // Detect victory after the player's action.
     // If the boss is defeated, set the correct end-state and stop.
+     if (!boss.isAlive())
+     {
+          gameOver = true;
+          playerWon = true;
+
+          addLog("The Abyss King has been defeated!");
+
+          return;
+     }
 
     endTurnIfNeeded();
 }
@@ -402,21 +423,25 @@ void Game::bossTurn() {
     // Log the action and damage.
 }
 
-int Game::findNextAlivePlayer(int startIndex) const {
+int Game::findNextAlivePlayer(int startIndex) const 
+{
     // TODO 25:
     // Return the index of the next alive player.
     // Wrap around using modular arithmetic.
     const int n = static_cast<int>(players.size());
-    for (int i = 1; i < n; i++) {
+    for (int i = 1; i <= n; i++) 
+    {
         const int idx = (startIndex + i) % n;
-        if (players[idx]->isAlive()) {
+        if (players[idx]->isAlive()) 
+        {
             return idx;
         }
     }
     return 0;
 }
 
-bool Game::allPlayersDefeated() const {
+bool Game::allPlayersDefeated() const 
+{
     // TODO 26:
     // Return true only if every player has been defeated.
     for (const auto& player : players) {
@@ -425,7 +450,8 @@ bool Game::allPlayersDefeated() const {
     return true;
 }
 
-void Game::resetGame() {
+void Game::resetGame() 
+{
     players.clear();
     players.emplace_back(std::make_unique<Warrior>("Brakus"));
     players.emplace_back(std::make_unique<Mage>("Lyra"));
@@ -439,13 +465,14 @@ void Game::resetGame() {
     addLog("Raid restarted.");
 }
 
-void Game::addLog(const std::string& line) {
+void Game::addLog(const std::string& line) 
+{
     battleLog.push_back(line);
 
     // TODO 27:
     // Limit the battle log to a fixed maximum number of visible messages.
 
-     while(battleLog.size() > 8)
+     while(battleLog.size() > 7)
           {
                battleLog.erase(battleLog.begin());
           }
@@ -491,11 +518,12 @@ void Game::drawTitle() {
                drawCenteredText("Defeat!!", 34, {600.f, 95.f}, sf::Color::Red);
           } 
      }
-else
-{
-     drawCenteredText(players[currentPlayerIndex]->getName() + "'s Turn",
-          34, {600.f, 95.f}, sf::Color::White);
-     
+     else
+     {
+          drawCenteredText(players[currentPlayerIndex]->getName() + "'s Turn",
+               34, {600.f, 95.f}, sf::Color::White);
+          
+     }
 }
 
 
@@ -514,9 +542,22 @@ void Game::drawPlayers() {
 
         // TODO 29:
         // Improve the card outline so the current player is visually highlighted.
-        card.setOutlineThickness(2.f);
-        card.setOutlineColor(players[i]->isAlive() ? sf::Color::White : sf::Color(120, 120, 120));
-        window.draw(card);
+        if (static_cast<int>(i) == currentPlayerIndex)
+        {
+             card.setOutlineThickness(4.f);
+             card.setOutlineColor(sf::Color::Yellow);
+        }
+         else
+        {
+             card.setOutlineThickness(2.f);
+             card.setOutlineColor(
+                  players[i]->isAlive()
+                  ? sf::Color::White 
+                  : sf::Color(120, 120, 120)
+             );
+        }
+        
+         window.draw(card);
 
         sf::CircleShape avatar(34.f);
         avatar.setPosition({x + 46.f, y + 18.f});
