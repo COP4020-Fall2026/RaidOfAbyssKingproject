@@ -242,14 +242,28 @@ int Boss::basicAttack(Character& target) {
     // TODO 12:
     // Implement the boss basic attack.
     // The boss should also build rage over time.
-    return 0;
+    int damage = attackPower + (std::rand() % 9);
+
+    target.takeDamage(damage);
+    addRage(20);
+    return damage;
 }
 
 int Boss::specialMove(Character& target) {
     // TODO 13:
     // Implement the boss special move.
     // This move should be stronger than the basic attack and should affect rage.
-    return 0;
+
+    if (rage < 60) {
+        throw std::runtime_error("Not enough rage for special attack.");
+     }
+
+    int damage = (attackPower * 2) + (std::rand() % 13);
+
+    target.takeDamage(damage);
+    rage = 0;
+
+    return damage;
 }
 
 std::string Boss::getClassName() const { return "Boss"; }
@@ -258,13 +272,27 @@ int Boss::getRage() const { return rage; }
 void Boss::addRage(int amount) {
     // TODO 14:
     // Update rage while keeping it in a valid range.
+
+    if (amount < 0) {
+        throw std::invalid_argument("Rage cannot be negative.");
+    }
+
     rage += amount;
+
+    if (rage > 100) {
+        rage = 100;
+    }
 }
 
 std::string Boss::chooseAttackName() const {
     // TODO 15:
     // Return the name of the attack pattern based on rage.
-    return "Unknown Pattern";
+
+    if (rage >= 60) {
+        return "Abyssal Smash";
+    }
+
+    return "Shadow Slash";
 }
 
 // =====================================================
