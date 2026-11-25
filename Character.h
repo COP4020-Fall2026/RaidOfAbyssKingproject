@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
-
+ 
 using namespaces std;
 
 class Character {
