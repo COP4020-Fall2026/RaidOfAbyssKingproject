@@ -1,4 +1,6 @@
 #include "Game.h"
+#include "Player.h"
+#include "Character.h"
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -6,6 +8,7 @@
 #include <sstream>
 #include <stdexcept>
 
+using namespace std;
 // =====================================================
 // Character
 // =====================================================
@@ -26,7 +29,11 @@ void Character::takeDamage(int amount) {
     if (amount < 0) {
         throw std::invalid_argument("Damage cannot be negative.");
     }
-
+     //75% of damage is blocked when defending
+if (defending == true){
+     amount = amount / 4;
+     defending = false;
+};
     // TODO 1:
     // Complete the damage system.
     // Requirements:
@@ -45,12 +52,16 @@ void Character::heal(int amount) {
         throw std::invalid_argument("Heal amount cannot be negative.");
     }
 
+     health += amount; 
+     if (health > maxHealth){
+          health = maxhealth; 
+     }
+     
     // TODO 2:
     // Complete the healing system.
     // Requirements:
     // 1. Increase the character health.
     // 2. Do not allow health to exceed maxHealth.
-    health += amount;
 }
 
 bool Character::isAlive() const { return health > 0; }
@@ -63,13 +74,28 @@ int Character::getEnergy() const { return energy; }
 int Character::getAttackPower() const { return attackPower; }
 
 void Character::addEnergy(int amount) {
+
+     if(energy + amount > 100){
+          energy =100;
+     } else {
+energy += amount;
+     }
+
+     if(energy < 0){
+          energy = 0;
+     }
     // TODO 3:
     // Update energy while keeping it in a valid range.
     // In the reference version, energy should not exceed 100.
-    energy += amount;
 }
 
 void Character::consumeEnergy(int amount) {
+     if(amount <0) {
+          throw std::invalid_argument("Energy amount cannot be negative.")
+     }
+     if (amount > energy){
+          throw std::invalid_argument("Not enough energy");
+     }
     // TODO 4:
     // Validate that the player has enough energy.
     // Throw an exception if the action cannot be completed.
@@ -84,6 +110,12 @@ Player::Player(const std::string& n, int hp, int atk, int en, int pots)
     : Character(n, hp, atk, en), potions(pots) {}
 
 int Player::usePotion() {
+     if(potions <= 0){
+throw std::runtime_error("No potions remaining"); 
+     }
+     int oldHealth = health;
+     heal(30);
+     potions--;
     // TODO 5:
     // Implement potion logic.
     // Requirements:
@@ -91,13 +123,13 @@ int Player::usePotion() {
     // 2. Decrease potion count.
     // 3. Restore health using heal(...).
     // 4. Return the amount healed.
-    return 0;
+    return health - oldHealth;
 }
 
 int Player::getPotions() const { return potions; }
 void Player::addPotion(int amount) { potions += amount; }
 
-/*Implement here the overloaded operator =+ for Player class*/ {
+Player& Player::operator+=(int amount)/*Implement here the overloaded operator =+ for Player class*/ {
     heal(amount);
     return *this;
 }
@@ -118,6 +150,10 @@ std::ostream& operator<<(std::ostream& os, const Player& p) {
 Warrior::Warrior(const std::string& n) : Player(n, 160, 24, 100, 2) {}
 
 int Warrior::basicAttack(Character& target) {
+     int damage = attackPower + (rand() % 6 + 1);
+     int oldHealth = target.getHealth();
+     target.takeDamage(damage);
+     addEnergy(10);
     // TODO 6:
     // Create the Warrior basic attack.
     // Requirements:
@@ -125,13 +161,17 @@ int Warrior::basicAttack(Character& target) {
     // 2. Apply damage to the target.
     // 3. Reward some energy to the Warrior.
     // 4. Return the damage dealt.
-    return 0;
+    return oldHealth - target.getHealth();
 }
 
 int Warrior::specialMove(Character& target) {
+     consumeEnergy(35);
+     int damage = attackPower * 2 + (rand() % 11);
+     int oldHealth = target.getHealth();
+     target.takeDamage(damage);
     // TODO 7:
     // Create a stronger Warrior move that consumes energy.
-    return 0;
+    return oldHealth - target.getHealth();
 }
 
 std::string Warrior::getClassName() const { return "Warrior"; }
@@ -143,15 +183,24 @@ std::string Warrior::getClassName() const { return "Warrior"; }
 Mage::Mage(const std::string& n) : Player(n, 110, 20, 100, 3) {}
 
 int Mage::basicAttack(Character& target) {
+     int damage = attackPower + (rand() % 9 +1);
+     int oldHealth = target.getHealth();
+     target.takeDamage(damage);
+     addEnergy(10)
     // TODO 8:
     // Implement the Mage basic attack.
-    return 0;
+    return oldHealth - target.getHealth();
 }
 
 int Mage::specialMove(Character& target) {
+     consumeEnergy(45);
+      int damage = attackPower + (rand() % 9 +1);
+     int oldHealth = target.getHealth();
+     target.takeDamage(damage);
+     addEnergy(10)
+    return oldHealth - target.getHealth();
     // TODO 9:
     // Implement the Mage special move with higher burst damage.
-    return 0;
 }
 
 std::string Mage::getClassName() const { return "Mage"; }
@@ -163,18 +212,22 @@ std::string Mage::getClassName() const { return "Mage"; }
 Healer::Healer(const std::string& n) : Player(n, 125, 16, 100, 4) {}
 
 int Healer::basicAttack(Character& target) {
-    // TODO 10:
-    // Implement the Healer basic attack.
-    return 0;
+ int damage = attackPower + (rand() % 4 + 1);
+     int oldHealth = target.getHealth();
+     target.takeDamage(damage);
+     addEnergy(10);
+    return oldHealth - target.getHealth();
 }
 
 int Healer::specialMove(Character& target) {
     (void)target;
-
+consumeEnergy(30);
+     int oldHealth = health;
+     heal(40);
     // TODO 11:
     // Implement the Healer special move.
     // This move should heal the Healer and consume energy.
-    return 0;
+    return health - oldHealth;
 }
 
 std::string Healer::getClassName() const { return "Healer"; }
