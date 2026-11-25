@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "Player.h"
 #include "Character.h"
-#include <algorithm>
+#include <algorithm> 
 #include <cstdlib>
 #include <ctime>
 #include <optional>
@@ -21,7 +21,7 @@ Character::Character(const std::string& n, int hp, int atk, int en){
     attackPower = atk;
     defending = false; 
     if (hp <= 0 || atk <= 0 || en < 0) {
-        throw std::invalid_argument("Invalid character stats.");
+        throw std::invalid_argument("Invalid character stats."); 
     }
 }
 
