@@ -7,9 +7,22 @@
 class Boss : public Character {
 private:
     int rage;
-hjhjj
+
 public:
-    // TO DO implement the required member functions
+    // constructor
+    Boss(const std::string& n);
+
+    // Boss attack functions
+    int basicAttack(Character& target) override;
+    int specialMove(Character& target) override;
+
+    // Returns the Boss class name
+    std::string getClassName() const override;
+
+    // Rage functions 
+    int getRage() const;
+    void addRage(int amount);
+    std::string chooseAttackName() const;
 };
 
 #endif
