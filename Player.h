@@ -16,11 +16,11 @@ public:
     int usePotion();
     int getPotions() const;
     void addPotion(int amount);
-Player& operator +=(int amount);
+Player& operator+=(int amount);
     /*prototype the Overload the operator += function; return a Player and received one parameter int*/
     bool operator==(const Player& other) const;
     /*Prototype the Overload the operator << functions, provide the nedded parameters, and the correct overloading syntax*/
-Friend std::ostream& operator<<(std::ostream& os, const Player& player);
+friend std::ostream& operator<<(std::ostream& os, const Player& player);
 };
 
 /*Note:
