@@ -21,13 +21,12 @@ public:
     virtual ~Character() = default;
 
     // ADD THE pure virtual FUNCTION basicAttack 
-   /* virtual int basicAttack(Character& target) = 0; */
+    virtual int basicAttack(Character& target) = 0;
     virtual int specialMove(Character& target) = 0;
     virtual string getClassName() const = 0;
-    /* virtual void heal(int amount) */
     virtual void takeDamage(int amount);
     // ADD THE virtual void heal(int amount);
-    virtual void heal(int amount
+    virtual void heal(int amount);
     bool isAlive() const;
     // Add setDefending function;
 void setDefending(bool value);
